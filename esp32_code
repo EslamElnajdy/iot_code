@@ -1,0 +1,45 @@
+#include <ThingSpeak.h>               // add librery
+#include <ESP8266WiFi.h>
+
+#include <LiquidCrystal.h>
+const int RS = D2, EN = D3, d4 = D5, d5 = D6, d6 = D7, d7 = D8;
+LiquidCrystal lcd(RS, EN, d4, d5, d6, d7);
+
+WiFiClient  client;
+unsigned long counterChannelNumber = 2369886;                // Channel ID
+const char * myCounterReadAPIKey = "C2YM6TU8A96O4J82";      // Read API Key
+const int FieldNumber1 = 1;                                 // The field you wish to read
+String presentStr,previousStr = " ";
+
+void setup()
+{
+  lcd.begin(16, 2);
+  Serial.begin(115200);
+  Serial.println();
+
+  WiFi.begin("POCO PHONE", "9004652173");                 // write wifi name & password           
+
+  Serial.print("Connecting");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.print("Connected, IP address: ");
+  Serial.println(WiFi.localIP());
+  ThingSpeak.begin(client);
+}
+
+void loop() 
+{
+ presentStr = ThingSpeak.readStringField(counterChannelNumber, FieldNumber1, myCounterReadAPIKey);
+ if(presentStr != previousStr)
+ {
+  lcd.clear();
+  Serial.println(presentStr);
+  lcd.setCursor(0, 0);
+  lcd.print(presentStr);
+  previousStr = presentStr;
+ }
+}
